@@ -1,15 +1,15 @@
 /**
  * =================================================================================
  * 项目: Typli API Ultimate - Enhanced Image Generation
- * 版本: 5.1.0-enhanced-image
+ * 版本: 5.2.0-clean
  * 作者: kinai9661
- * 新增: 图像尺寸 + 高级参数 + 风格预设 + 批量生成 + 成人内容 + 历史记录
+ * 更新: 移除成人内容功能 + 图片历史单独页面
  * =================================================================================
  */
 
 const CONFIG = {
   PROJECT_NAME: "Typli API 终极版",
-  VERSION: "5.1.0",
+  VERSION: "5.2.0",
   API_MASTER_KEY: "1",
   UPSTREAM_CHAT_URL: "https://typli.ai/api/generators/chat",
   UPSTREAM_IMAGE_URL: "https://typli.ai/api/generators/images",
@@ -198,7 +198,7 @@ function handleUI(request) {
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
---chat:#667eea;--image:#f5576c;--api:#10b981;
+--chat:#667eea;--image:#f5576c;--api:#10b981;--history:#f59e0b;
 --bg:#0f172a;--surface:#1e293b;--card:#334155;
 --text:#f1f5f9;--text2:#94a3b8;--border:rgba(255,255,255,.1);
 --success:#10b981;--warning:#f59e0b;--error:#ef4444;
@@ -358,16 +358,21 @@ input[type=file]{display:none}
 .batch-btn{flex:1;padding:8px;border:2px solid var(--border);background:var(--card);color:var(--text);border-radius:7px;cursor:pointer;font-size:11px;font-weight:600;transition:all .2s}
 .batch-btn:hover{background:var(--surface);border-color:var(--image)}
 .batch-btn.active{background:var(--image);color:#fff;border-color:var(--image)}
-.nsfw-warning{background:linear-gradient(135deg,rgba(239,68,68,.1),rgba(245,87,108,.1));border:1px solid var(--error);padding:12px;border-radius:8px;margin-top:10px;font-size:11px;color:var(--text2);line-height:1.6}
-.nsfw-toggle{display:flex;align-items:center;justify-content:space-between;padding:10px;background:var(--surface);border-radius:7px;margin-top:8px;cursor:pointer;transition:all .2s}
-.nsfw-toggle:hover{background:var(--card)}
-.toggle-switch{position:relative;width:44px;height:24px;background:var(--border);border-radius:12px;transition:all .3s}
-.toggle-switch.active{background:var(--error)}
-.toggle-slider{position:absolute;top:2px;left:2px;width:20px;height:20px;background:#fff;border-radius:50%;transition:all .3s;box-shadow:0 2px 4px rgba(0,0,0,.2)}
-.toggle-switch.active .toggle-slider{transform:translateX(20px)}
-.history-images{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:10px}
-.history-img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px;border:2px solid var(--border);cursor:pointer;transition:all .2s}
-.history-img:hover{border-color:var(--image);transform:scale(1.05)}
+
+/* 历史页面样式 */
+.history-panel{padding:20px;overflow-y:auto}
+.history-header{max-width:1200px;margin:0 auto 24px;text-align:center}
+.history-title{font-size:var(--font-2xl);font-weight:800;background:linear-gradient(135deg,var(--history),var(--image));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:8px}
+.history-stats{display:flex;gap:16px;justify-content:center;flex-wrap:wrap}
+.stat-item{background:var(--surface);padding:12px 20px;border-radius:10px;border:1px solid var(--border)}
+.stat-label{font-size:var(--font-xxs);color:var(--text2);margin-bottom:4px}
+.stat-value{font-size:var(--font-xl);font-weight:700;color:var(--text)}
+.history-grid{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px}
+.history-controls{max-width:1200px;margin:0 auto 20px;display:flex;gap:12px;justify-content:space-between;align-items:center;flex-wrap:wrap}
+.filter-group{display:flex;gap:8px;flex-wrap:wrap}
+.filter-btn{padding:8px 16px;border:2px solid var(--border);background:var(--card);color:var(--text);border-radius:8px;cursor:pointer;font-size:var(--font-xs);font-weight:600;transition:all .2s}
+.filter-btn:hover{background:var(--surface);border-color:var(--history)}
+.filter-btn.active{background:var(--history);color:#fff;border-color:var(--history)}
 
 @media(max-width:1400px){
 :root{--center-width:700px}
@@ -391,6 +396,7 @@ input[type=file]{display:none}
 .controls .btn-icon{display:block}
 .image-sidebar{width:100%}
 .style-presets{grid-template-columns:repeat(2,1fr)}
+.history-grid{grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}
 }
 ::-webkit-scrollbar{width:7px}
 ::-webkit-scrollbar-track{background:transparent}
@@ -403,6 +409,7 @@ input[type=file]{display:none}
 <div class="tabs">
 <button class="tab active" onclick="switchMode('chat')">💬 聊天</button>
 <button class="tab" onclick="switchMode('image')">🎨 图像</button>
+<button class="tab" onclick="switchMode('history')">📜 历史</button>
 <button class="tab" onclick="switchMode('api')">📡 接口</button>
 </div>
 <div class="controls">
@@ -618,27 +625,47 @@ input[type=file]{display:none}
 </div>
 </div>
 
-<div class="card">
-<span class="label">🔞 成人内容</span>
-<div class="nsfw-toggle" onclick="toggleNSFW()">
-<div>
-<div style="font-weight:600;font-size:12px;color:var(--text)">允许成人内容</div>
-<div style="font-size:10px;color:var(--text2);margin-top:2px">生成不受限制的图像</div>
-</div>
-<div class="toggle-switch" id="nsfw-toggle">
-<div class="toggle-slider"></div>
-</div>
-</div>
-<div class="nsfw-warning" id="nsfw-warning" style="display:none">
-⚠️ <strong>注意：</strong>启用后可生成包含成人、暴力等敏感内容的图像。请遵守当地法律法规，不得用于非法用途。
-</div>
-</div>
-
 <button class="btn-primary btn-image" id="gen-btn" onclick="generateImage()">✨ 生成图像</button>
 </aside>
 
 <div class="image-gallery" id="image-gallery">
 <div class="empty" style="grid-column:1/-1"><div class="empty-icon">🖼️</div><h3 style="font-size:var(--font-lg)">暂无图像</h3><p style="margin-top:8px;font-size:var(--font-xs)">开始创作您的第一张 AI 图像</p></div>
+</div>
+</div>
+
+<div class="panel history-panel" id="history-panel">
+<div class="history-header">
+<h2 class="history-title">📜 图像历史记录</h2>
+<div class="history-stats">
+<div class="stat-item">
+<div class="stat-label">总图像数</div>
+<div class="stat-value" id="total-images">0</div>
+</div>
+<div class="stat-item">
+<div class="stat-label">今日生成</div>
+<div class="stat-value" id="today-images">0</div>
+</div>
+<div class="stat-item">
+<div class="stat-label">本周生成</div>
+<div class="stat-value" id="week-images">0</div>
+</div>
+</div>
+</div>
+<div class="history-controls">
+<div class="filter-group">
+<button class="filter-btn active" onclick="filterHistory('all')">全部</button>
+<button class="filter-btn" onclick="filterHistory('today')">今天</button>
+<button class="filter-btn" onclick="filterHistory('week')">本周</button>
+<button class="filter-btn" onclick="filterHistory('month')">本月</button>
+</div>
+<div class="filter-group">
+<button class="filter-btn" onclick="sortHistory('newest')">最新优先</button>
+<button class="filter-btn" onclick="sortHistory('oldest')">最早优先</button>
+<button class="btn-primary btn-chat" onclick="clearImageHistory()" style="background:var(--error);width:auto;padding:8px 16px">🗑️ 清空历史</button>
+</div>
+</div>
+<div class="history-grid" id="history-grid">
+<div class="empty" style="grid-column:1/-1"><div class="empty-icon">🖼️</div><h3 style="font-size:var(--font-lg)">暂无历史图像</h3><p style="margin-top:8px;font-size:var(--font-xs)">生成的图像将显示在这里</p></div>
 </div>
 </div>
 
@@ -671,16 +698,17 @@ input[type=file]{display:none}
 <script>
 const API='${origin}/v1/chat/completions',KEY='${key}';
 let chatHistory=[],allChats=[],currentChatId=null,isGenerating=false,currentReader=null,streamMode=true,uploadedFiles=[];
-let imageSettings={style:'',aspect:'1:1',steps:30,cfg:7.5,seed:null,batch:1,nsfw:false};
+let imageSettings={style:'',aspect:'1:1',steps:30,cfg:7.5,seed:null,batch:1};
 let imageHistory=[];
+let currentFilter='all',currentSort='newest';
 marked.setOptions({highlight:(c,l)=>l&&hljs.getLanguage(l)?hljs.highlight(c,{language:l}).value:hljs.highlightAuto(c).value,breaks:true});
 
-// 加载保存的图像历史
+// 加载保存的数据
 try{
 const saved=localStorage.getItem('typli_chats');
 if(saved){allChats=JSON.parse(saved);if(allChats.length>0){loadChat(allChats[0].id);renderHistory()}}
 const savedImages=localStorage.getItem('typli_images');
-if(savedImages){imageHistory=JSON.parse(savedImages)}
+if(savedImages){imageHistory=JSON.parse(savedImages);updateHistoryStats()}
 }catch(e){}
 
 if(window.innerWidth<=768){document.querySelectorAll('.controls .btn-icon').forEach(btn=>{if(btn.title!=='主题')btn.style.display='block'})}
@@ -774,30 +802,14 @@ function setBatch(count){
   imageSettings.batch=count;
   showToast('批量设置：'+count+' 张','success');
 }
-function toggleNSFW(){
-  imageSettings.nsfw=!imageSettings.nsfw;
-  const toggle=document.getElementById('nsfw-toggle');
-  const warning=document.getElementById('nsfw-warning');
-  toggle.classList.toggle('active');
-  warning.style.display=imageSettings.nsfw?'block':'none';
-  showToast('成人内容：'+(imageSettings.nsfw?'已启用':'已禁用'),imageSettings.nsfw?'error':'success');
-}
 
 async function generateImage(){
   let prompt=document.getElementById('image-prompt').value.trim();
   const negPrompt=document.getElementById('negative-prompt').value.trim();
   if(!prompt)return showToast('请输入提示词','warning');
   
-  // 添加风格关键词
   if(imageSettings.style){prompt+=', '+imageSettings.style}
-  
-  // 添加负面提示词
   if(negPrompt){prompt+=' [negative: '+negPrompt+']'}
-  
-  // 添加 NSFW 标记
-  if(imageSettings.nsfw){prompt=' [NSFW allowed] '+prompt}
-  
-  // 添加参数
   prompt+=' --ar '+imageSettings.aspect+' --steps '+imageSettings.steps+' --cfg '+imageSettings.cfg;
   if(imageSettings.seed){prompt+=' --seed '+imageSettings.seed}
   
@@ -833,8 +845,7 @@ async function generateImage(){
           aspect:imageSettings.aspect,
           steps:imageSettings.steps,
           cfg:imageSettings.cfg,
-          seed:imageSettings.seed,
-          nsfw:imageSettings.nsfw
+          seed:imageSettings.seed
         });
       }
       
@@ -862,8 +873,9 @@ function addImageCard(prompt,url,model,settings){
   const shortModel=model.split('/').pop();
   const imageData={prompt,url,model,settings,timestamp:Date.now()};
   imageHistory.unshift(imageData);
-  if(imageHistory.length>50)imageHistory=imageHistory.slice(0,50);
+  if(imageHistory.length>100)imageHistory=imageHistory.slice(0,100);
   localStorage.setItem('typli_images',JSON.stringify(imageHistory));
+  updateHistoryStats();
   
   card.innerHTML='<img src="'+url+'" alt="'+prompt+'"><div class="image-actions"><button class="img-btn" onclick="downloadImg(\\''+url+'\\',\\''+prompt+'\\')">💾</button><button class="img-btn" onclick="viewImg(\\''+url+'\\')">🔍</button><button class="img-btn" onclick="regenImage(\\''+prompt+'\\')">🔄</button></div><div class="image-info"><div class="image-prompt">'+prompt+'</div><div class="image-meta"><span class="image-model">'+shortModel+'</span><span>'+settings.aspect+' • '+settings.steps+' steps</span></div></div>';
   document.getElementById('image-gallery').prepend(card);
@@ -874,11 +886,88 @@ function regenImage(prompt){
   showToast('提示词已填入，可调整参数后重新生成','success');
 }
 
+// 历史页面功能
+function updateHistoryStats(){
+  const now=Date.now();
+  const today=new Date().setHours(0,0,0,0);
+  const week=now-7*24*60*60*1000;
+  
+  document.getElementById('total-images').textContent=imageHistory.length;
+  document.getElementById('today-images').textContent=imageHistory.filter(img=>img.timestamp>=today).length;
+  document.getElementById('week-images').textContent=imageHistory.filter(img=>img.timestamp>=week).length;
+}
+
+function filterHistory(filter){
+  currentFilter=filter;
+  document.querySelectorAll('.filter-group .filter-btn').forEach(btn=>{
+    if(btn.textContent.includes('全部')||btn.textContent.includes('今天')||btn.textContent.includes('本周')||btn.textContent.includes('本月')){
+      btn.classList.remove('active');
+    }
+  });
+  event.currentTarget.classList.add('active');
+  renderHistoryGrid();
+}
+
+function sortHistory(sort){
+  currentSort=sort;
+  renderHistoryGrid();
+  showToast('排序：'+(sort==='newest'?'最新优先':'最早优先'),'success');
+}
+
+function renderHistoryGrid(){
+  const grid=document.getElementById('history-grid');
+  let filtered=imageHistory.slice();
+  
+  const now=Date.now();
+  const today=new Date().setHours(0,0,0,0);
+  const week=now-7*24*60*60*1000;
+  const month=now-30*24*60*60*1000;
+  
+  if(currentFilter==='today')filtered=filtered.filter(img=>img.timestamp>=today);
+  else if(currentFilter==='week')filtered=filtered.filter(img=>img.timestamp>=week);
+  else if(currentFilter==='month')filtered=filtered.filter(img=>img.timestamp>=month);
+  
+  if(currentSort==='oldest')filtered.reverse();
+  
+  if(filtered.length===0){
+    grid.innerHTML='<div class="empty" style="grid-column:1/-1"><div class="empty-icon">🖼️</div><h3 style="font-size:var(--font-lg)">暂无图像</h3><p style="margin-top:8px;font-size:var(--font-xs)">该时间段内没有生成图像</p></div>';
+    return;
+  }
+  
+  grid.innerHTML=filtered.map((img,idx)=>{
+    const shortModel=img.model.split('/').pop();
+    const date=new Date(img.timestamp).toLocaleDateString('zh-CN');
+    return '<div class="image-card"><img src="'+img.url+'" alt="'+img.prompt+'"><div class="image-actions"><button class="img-btn" onclick="downloadImg(\\''+img.url+'\\',\\''+img.prompt+'\\')">💾</button><button class="img-btn" onclick="viewImg(\\''+img.url+'\\')">🔍</button><button class="img-btn" onclick="deleteHistoryImage('+idx+')">🗑️</button></div><div class="image-info"><div class="image-prompt">'+img.prompt+'</div><div class="image-meta"><span class="image-model">'+shortModel+'</span><span>'+date+'</span></div></div></div>';
+  }).join('');
+}
+
+function deleteHistoryImage(index){
+  if(!confirm('确定删除这张图像？'))return;
+  imageHistory.splice(index,1);
+  localStorage.setItem('typli_images',JSON.stringify(imageHistory));
+  updateHistoryStats();
+  renderHistoryGrid();
+  showToast('已删除','success');
+}
+
+function clearImageHistory(){
+  if(!confirm('确定清空所有历史图像？'))return;
+  imageHistory=[];
+  localStorage.setItem('typli_images',JSON.stringify(imageHistory));
+  updateHistoryStats();
+  renderHistoryGrid();
+  showToast('历史已清空','success');
+}
+
 function switchMode(mode){
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
   event.target.classList.add('active');
   document.getElementById(mode+'-panel').classList.add('active');
+  
+  if(mode==='history'){
+    renderHistoryGrid();
+  }
 }
 
 function toggleTheme(){
@@ -1101,4 +1190,3 @@ function randomId(len){const chars='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqr
 function makeChunk(id,model,content,finish=null){return {id:`chatcmpl-${id}`,object:'chat.completion.chunk',created:Math.floor(Date.now()/1000),model,choices:[{index:0,delta:content?{content}:{},finish_reason:finish}]}}
 function jsonError(msg,status){return new Response(JSON.stringify({error:{message:msg,type:'api_error'}}),{status,headers:corsHeaders({'Content-Type':'application/json'})})}
 function corsHeaders(h={}){return {...h,'Access-Control-Allow-Origin':'*','Access-Control-Allow-Methods':'GET, POST, OPTIONS','Access-Control-Allow-Headers':'Content-Type, Authorization'}}
-

@@ -1,4 +1,4 @@
-name = "flux2.0api"
+name = "fluxapi"
 main = "worker.js"
 compatibility_date = "2024-12-01"
 

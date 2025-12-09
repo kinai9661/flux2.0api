@@ -1,0 +1,6 @@
+name = "flux2.0api"
+main = "worker.js"
+compatibility_date = "2024-12-01"
+
+[env.production]
+name = "flux2-api"

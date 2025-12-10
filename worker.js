@@ -1,15 +1,15 @@
 /**
  * =================================================================================
  * 项目: Typli API Ultimate - Enhanced Image Generation
- * 版本: 5.2.0-clean
+ * 版本: 5.2.1-fixed
  * 作者: kinai9661
- * 更新: 移除成人内容功能 + 图片历史单独页面
+ * 更新: 修复风格预设 + 移除布局说明
  * =================================================================================
  */
 
 const CONFIG = {
   PROJECT_NAME: "Typli API 终极版",
-  VERSION: "5.2.0",
+  VERSION: "5.2.1",
   API_MASTER_KEY: "1",
   UPSTREAM_CHAT_URL: "https://typli.ai/api/generators/chat",
   UPSTREAM_IMAGE_URL: "https://typli.ai/api/generators/images",
@@ -336,8 +336,6 @@ textarea{min-height:90px;resize:vertical;line-height:1.6}
 .file-item-remove:hover{transform:scale(1.1)}
 .file-preview-img{max-width:100px;max-height:100px;border-radius:6px;border:1px solid var(--border);object-fit:cover}
 input[type=file]{display:none}
-
-/* 图像生成增强样式 */
 .style-presets{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}
 .style-btn{padding:8px 4px;border:2px solid var(--border);background:var(--card);color:var(--text);border-radius:7px;cursor:pointer;font-size:10px;font-weight:600;transition:all .2s;text-align:center;display:flex;flex-direction:column;align-items:center;gap:4px}
 .style-btn:hover{background:var(--surface);border-color:var(--image)}
@@ -358,8 +356,6 @@ input[type=file]{display:none}
 .batch-btn{flex:1;padding:8px;border:2px solid var(--border);background:var(--card);color:var(--text);border-radius:7px;cursor:pointer;font-size:11px;font-weight:600;transition:all .2s}
 .batch-btn:hover{background:var(--surface);border-color:var(--image)}
 .batch-btn.active{background:var(--image);color:#fff;border-color:var(--image)}
-
-/* 历史页面样式 */
 .history-panel{padding:20px;overflow-y:auto}
 .history-header{max-width:1200px;margin:0 auto 24px;text-align:center}
 .history-title{font-size:var(--font-2xl);font-weight:800;background:linear-gradient(135deg,var(--history),var(--image));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:8px}
@@ -373,7 +369,6 @@ input[type=file]{display:none}
 .filter-btn{padding:8px 16px;border:2px solid var(--border);background:var(--card);color:var(--text);border-radius:8px;cursor:pointer;font-size:var(--font-xs);font-weight:600;transition:all .2s}
 .filter-btn:hover{background:var(--surface);border-color:var(--history)}
 .filter-btn.active{background:var(--history);color:#fff;border-color:var(--history)}
-
 @media(max-width:1400px){
 :root{--center-width:700px}
 .left-sidebar,.right-sidebar{min-width:250px;max-width:350px}
@@ -418,7 +413,6 @@ input[type=file]{display:none}
 <button class="btn-icon" onclick="togglePanel('right')" title="设置" style="display:none">⚙️</button>
 </div>
 </nav>
-
 <div class="container">
 <div class="panel chat-panel active" id="chat-panel">
 <aside class="left-sidebar" id="left-sidebar">
@@ -427,30 +421,17 @@ input[type=file]{display:none}
 <button class="new-chat-btn" onclick="newChat()"><span>➕</span><span>新建对话</span></button>
 </div>
 <div class="sidebar-content">
-<div class="info-card">
-<div class="info-card-header">💡 布局说明</div>
-<div class="info-card-text">
-<strong>固定中间布局：</strong><br>
-<span class="info-badge">左侧弹性</span>
-<span class="info-badge">中间 800px</span>
-<span class="info-badge">右侧弹性</span>
-</div>
-<div class="info-card-text">
-<strong>功能特点：</strong> 固定宽度 • 自动保存 • 文件上传 • 流式输出
-</div>
-</div>
 <div class="history-list" id="history-list">
 <div class="empty" style="padding:18px"><div style="font-size:26px;margin-bottom:7px">📝</div><p style="font-size:var(--font-xxs)">暂无历史记录</p></div>
 </div>
 </div>
 </aside>
-
 <main class="chat-main">
 <div class="chat-messages" id="chat-messages">
 <div class="empty">
 <div class="empty-icon">💬</div>
 <h3 style="font-size:var(--font-lg)">欢迎使用 AI 聊天</h3>
-<p style="margin-top:7px;font-size:var(--font-xs)">固定 800px 宽度 • 支持文件上传 • 流式输出模式</p>
+<p style="margin-top:7px;font-size:var(--font-xs)">支持多模型对话 • 文件上传 • 流式输出</p>
 </div>
 </div>
 <div class="chat-input-box">
@@ -471,18 +452,11 @@ input[type=file]{display:none}
 <input type="file" id="file-input" multiple accept="image/*,.pdf,.txt,.doc,.docx,.js,.py,.json,.html,.css,.md" onchange="handleFileSelect(event)">
 </div>
 </main>
-
 <aside class="right-sidebar" id="right-sidebar">
 <div class="sidebar-header">
 <div class="sidebar-title">⚙️ 设置中心</div>
 </div>
 <div class="sidebar-content">
-<div class="info-card">
-<div class="info-card-header">🎯 固定中间布局</div>
-<div class="info-card-text">
-聊天区域保持 <strong>800px</strong> 固定宽度，提供最佳阅读体验
-</div>
-</div>
 <div class="card">
 <span class="label">🤖 AI 模型</span>
 <select id="chat-model" onchange="updateModelInfo()">
@@ -524,11 +498,9 @@ input[type=file]{display:none}
 </div>
 </aside>
 </div>
-
 <div class="panel image-panel" id="image-panel">
 <aside class="image-sidebar">
 <div class="studio-header"><h2 class="studio-title">🎨 图像工作室 Pro</h2></div>
-
 <div class="card">
 <span class="label">🎯 图像模型</span>
 <select id="image-model">
@@ -539,17 +511,14 @@ input[type=file]{display:none}
 <option value="fal-ai/stable-diffusion-v35-large">Stable Diffusion v3.5 (大型版)</option>
 </select>
 </div>
-
 <div class="card">
 <span class="label">✍️ 提示词</span>
 <textarea id="image-prompt" placeholder="描述您想要生成的图像..." style="min-height:80px"></textarea>
 </div>
-
 <div class="card">
 <span class="label">🚫 负面提示词 (可选)</span>
 <textarea id="negative-prompt" placeholder="不想出现的元素..." style="min-height:60px"></textarea>
 </div>
-
 <div class="card">
 <span class="label">🎨 风格预设</span>
 <div class="style-presets">
@@ -579,7 +548,6 @@ input[type=file]{display:none}
 </div>
 </div>
 </div>
-
 <div class="card">
 <span class="label">📐 图像比例</span>
 <div class="aspect-ratios">
@@ -590,7 +558,6 @@ input[type=file]{display:none}
 <div class="aspect-btn" data-ratio="21:9" onclick="setAspect('21:9')">21:9</div>
 </div>
 </div>
-
 <div class="card">
 <span class="label">⚙️ 生成参数</span>
 <div class="slider-container">
@@ -615,7 +582,6 @@ input[type=file]{display:none}
 <input type="number" style="width:100%;margin-top:6px;padding:6px" id="seed-input" placeholder="留空为随机" oninput="updateSeed(this.value)">
 </div>
 </div>
-
 <div class="card">
 <span class="label">🔢 批量生成</span>
 <div class="batch-selector">
@@ -624,15 +590,12 @@ input[type=file]{display:none}
 <div class="batch-btn" onclick="setBatch(4)">4 张</div>
 </div>
 </div>
-
 <button class="btn-primary btn-image" id="gen-btn" onclick="generateImage()">✨ 生成图像</button>
 </aside>
-
 <div class="image-gallery" id="image-gallery">
 <div class="empty" style="grid-column:1/-1"><div class="empty-icon">🖼️</div><h3 style="font-size:var(--font-lg)">暂无图像</h3><p style="margin-top:8px;font-size:var(--font-xs)">开始创作您的第一张 AI 图像</p></div>
 </div>
 </div>
-
 <div class="panel history-panel" id="history-panel">
 <div class="history-header">
 <h2 class="history-title">📜 图像历史记录</h2>
@@ -668,7 +631,6 @@ input[type=file]{display:none}
 <div class="empty" style="grid-column:1/-1"><div class="empty-icon">🖼️</div><h3 style="font-size:var(--font-lg)">暂无历史图像</h3><p style="margin-top:8px;font-size:var(--font-xs)">生成的图像将显示在这里</p></div>
 </div>
 </div>
-
 <div class="panel api-panel" id="api-panel">
 <div style="max-width:900px;margin:0 auto;padding:20px">
 <div style="text-align:center;margin-bottom:40px">
@@ -690,11 +652,9 @@ input[type=file]{display:none}
 </div>
 </div>
 </div>
-
 <div class="lightbox" id="lightbox" onclick="this.classList.remove('active')">
 <img id="lightbox-img" src="">
 </div>
-
 <script>
 const API='${origin}/v1/chat/completions',KEY='${key}';
 let chatHistory=[],allChats=[],currentChatId=null,isGenerating=false,currentReader=null,streamMode=true,uploadedFiles=[];
@@ -702,20 +662,15 @@ let imageSettings={style:'',aspect:'1:1',steps:30,cfg:7.5,seed:null,batch:1};
 let imageHistory=[];
 let currentFilter='all',currentSort='newest';
 marked.setOptions({highlight:(c,l)=>l&&hljs.getLanguage(l)?hljs.highlight(c,{language:l}).value:hljs.highlightAuto(c).value,breaks:true});
-
-// 加载保存的数据
 try{
 const saved=localStorage.getItem('typli_chats');
 if(saved){allChats=JSON.parse(saved);if(allChats.length>0){loadChat(allChats[0].id);renderHistory()}}
 const savedImages=localStorage.getItem('typli_images');
 if(savedImages){imageHistory=JSON.parse(savedImages);updateHistoryStats()}
 }catch(e){}
-
 if(window.innerWidth<=768){document.querySelectorAll('.controls .btn-icon').forEach(btn=>{if(btn.title!=='主题')btn.style.display='block'})}
-
 document.getElementById('chat-input').addEventListener('input',e=>{document.getElementById('char-count').textContent=e.target.value.length});
 document.getElementById('chat-input').addEventListener('keydown',e=>{if(e.ctrlKey&&e.key==='Enter'){e.preventDefault();sendChat()}});
-
 const fileArea=document.getElementById('file-area');
 const chatInput=document.getElementById('chat-input');
 ['dragenter','dragover','dragleave','drop'].forEach(evt=>{
@@ -725,7 +680,6 @@ const chatInput=document.getElementById('chat-input');
 ['dragenter','dragover'].forEach(evt=>{chatInput.addEventListener(evt,()=>fileArea.classList.add('dragover'))});
 ['dragleave','drop'].forEach(evt=>{chatInput.addEventListener(evt,()=>fileArea.classList.remove('dragover'))});
 chatInput.addEventListener('drop',e=>{const files=e.dataTransfer.files;if(files.length>0)handleFiles(files)});
-
 function triggerFileUpload(){document.getElementById('file-input').click()}
 function handleFileSelect(e){handleFiles(e.target.files);e.target.value=''}
 function handleFiles(files){
@@ -761,8 +715,6 @@ function removeFile(name){
   if(uploadedFiles.length===0)fileArea.classList.remove('active');
   showToast('文件已移除','success');
 }
-
-// 图像生成功能
 function setStyle(style){
   document.querySelectorAll('.style-btn').forEach(btn=>btn.classList.remove('active'));
   event.currentTarget.classList.add('active');
@@ -802,12 +754,12 @@ function setBatch(count){
   imageSettings.batch=count;
   showToast('批量设置：'+count+' 张','success');
 }
-
 async function generateImage(){
-  let prompt=document.getElementById('image-prompt').value.trim();
+  const originalPrompt=document.getElementById('image-prompt').value.trim();
   const negPrompt=document.getElementById('negative-prompt').value.trim();
-  if(!prompt)return showToast('请输入提示词','warning');
+  if(!originalPrompt)return showToast('请输入提示词','warning');
   
+  let prompt=originalPrompt;
   if(imageSettings.style){prompt+=', '+imageSettings.style}
   if(negPrompt){prompt+=' [negative: '+negPrompt+']'}
   prompt+=' --ar '+imageSettings.aspect+' --steps '+imageSettings.steps+' --cfg '+imageSettings.cfg;
@@ -841,7 +793,7 @@ async function generateImage(){
       
       const match=buffer.match(/!\\[.*?\\]\\((https?:\\/\\/[^)]+)\\)/);
       if(match&&match[1]){
-        addImageCard(document.getElementById('image-prompt').value,match[1],model,{
+        addImageCard(originalPrompt,match[1],model,{
           aspect:imageSettings.aspect,
           steps:imageSettings.steps,
           cfg:imageSettings.cfg,
@@ -865,7 +817,6 @@ async function generateImage(){
     btn.innerHTML=originalText;
   }
 }
-
 function addImageCard(prompt,url,model,settings){
   document.querySelector('.image-gallery .empty')?.remove();
   const card=document.createElement('div');
@@ -880,13 +831,10 @@ function addImageCard(prompt,url,model,settings){
   card.innerHTML='<img src="'+url+'" alt="'+prompt+'"><div class="image-actions"><button class="img-btn" onclick="downloadImg(\\''+url+'\\',\\''+prompt+'\\')">💾</button><button class="img-btn" onclick="viewImg(\\''+url+'\\')">🔍</button><button class="img-btn" onclick="regenImage(\\''+prompt+'\\')">🔄</button></div><div class="image-info"><div class="image-prompt">'+prompt+'</div><div class="image-meta"><span class="image-model">'+shortModel+'</span><span>'+settings.aspect+' • '+settings.steps+' steps</span></div></div>';
   document.getElementById('image-gallery').prepend(card);
 }
-
 function regenImage(prompt){
   document.getElementById('image-prompt').value=prompt;
   showToast('提示词已填入，可调整参数后重新生成','success');
 }
-
-// 历史页面功能
 function updateHistoryStats(){
   const now=Date.now();
   const today=new Date().setHours(0,0,0,0);
@@ -896,7 +844,6 @@ function updateHistoryStats(){
   document.getElementById('today-images').textContent=imageHistory.filter(img=>img.timestamp>=today).length;
   document.getElementById('week-images').textContent=imageHistory.filter(img=>img.timestamp>=week).length;
 }
-
 function filterHistory(filter){
   currentFilter=filter;
   document.querySelectorAll('.filter-group .filter-btn').forEach(btn=>{
@@ -907,13 +854,11 @@ function filterHistory(filter){
   event.currentTarget.classList.add('active');
   renderHistoryGrid();
 }
-
 function sortHistory(sort){
   currentSort=sort;
   renderHistoryGrid();
   showToast('排序：'+(sort==='newest'?'最新优先':'最早优先'),'success');
 }
-
 function renderHistoryGrid(){
   const grid=document.getElementById('history-grid');
   let filtered=imageHistory.slice();
@@ -940,7 +885,6 @@ function renderHistoryGrid(){
     return '<div class="image-card"><img src="'+img.url+'" alt="'+img.prompt+'"><div class="image-actions"><button class="img-btn" onclick="downloadImg(\\''+img.url+'\\',\\''+img.prompt+'\\')">💾</button><button class="img-btn" onclick="viewImg(\\''+img.url+'\\')">🔍</button><button class="img-btn" onclick="deleteHistoryImage('+idx+')">🗑️</button></div><div class="image-info"><div class="image-prompt">'+img.prompt+'</div><div class="image-meta"><span class="image-model">'+shortModel+'</span><span>'+date+'</span></div></div></div>';
   }).join('');
 }
-
 function deleteHistoryImage(index){
   if(!confirm('确定删除这张图像？'))return;
   imageHistory.splice(index,1);
@@ -949,7 +893,6 @@ function deleteHistoryImage(index){
   renderHistoryGrid();
   showToast('已删除','success');
 }
-
 function clearImageHistory(){
   if(!confirm('确定清空所有历史图像？'))return;
   imageHistory=[];
@@ -958,7 +901,6 @@ function clearImageHistory(){
   renderHistoryGrid();
   showToast('历史已清空','success');
 }
-
 function switchMode(mode){
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
@@ -969,7 +911,6 @@ function switchMode(mode){
     renderHistoryGrid();
   }
 }
-
 function toggleTheme(){
   const body=document.body;
   const theme=body.getAttribute('data-theme')==='dark'?'light':'dark';
@@ -977,9 +918,7 @@ function toggleTheme(){
   document.getElementById('theme-btn').textContent=theme==='dark'?'🌙':'☀️';
   showToast('主题：'+theme,'success');
 }
-
 function togglePanel(side){document.getElementById(side+'-sidebar').classList.toggle('show')}
-
 function updateModelInfo(){
   const model=document.getElementById('chat-model').value;
   const infos={
@@ -994,7 +933,6 @@ function updateModelInfo(){
   };
   document.getElementById('model-info').textContent=infos[model]||'高级 AI 模型';
 }
-
 function showToast(msg,type='success'){
   const toast=document.createElement('div');
   toast.className='toast '+type;
@@ -1002,9 +940,7 @@ function showToast(msg,type='success'){
   document.body.appendChild(toast);
   setTimeout(()=>toast.remove(),3000);
 }
-
 function getCurrentTime(){return new Date().toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'})}
-
 function newChat(){
   if(isGenerating)return showToast('请稍候...','warning');
   saveCurrentChat();
@@ -1017,7 +953,6 @@ function newChat(){
   renderHistory();
   showToast('已创建新对话','success');
 }
-
 function saveCurrentChat(){
   if(chatHistory.length===0)return;
   const existing=allChats.findIndex(c=>c.id===currentChatId);
@@ -1026,7 +961,6 @@ function saveCurrentChat(){
   if(allChats.length>50)allChats=allChats.slice(0,50);
   localStorage.setItem('typli_chats',JSON.stringify(allChats));
 }
-
 function loadChat(id){
   const chat=allChats.find(c=>c.id===id);
   if(!chat)return;
@@ -1037,7 +971,6 @@ function loadChat(id){
   chatHistory.forEach(m=>addChatMsg(m.role,m.content,m.time,false));
   renderHistory();
 }
-
 function renderHistory(){
   const list=document.getElementById('history-list');
   if(allChats.length===0){
@@ -1046,14 +979,12 @@ function renderHistory(){
   }
   list.innerHTML=allChats.map(c=>'<div class="history-item '+(c.id===currentChatId?'active':'')+'" onclick="loadChat('+c.id+')"><div class="history-title">'+c.title+'</div><div class="history-meta"><span>'+new Date(c.timestamp).toLocaleDateString()+'</span><span class="history-count">'+c.count+'</span></div></div>').join('');
 }
-
 function toggleStream(){
   streamMode=!streamMode;
   document.getElementById('stream-btn').classList.toggle('active');
   document.getElementById('stream-status').textContent=streamMode?'✅ 已启用':'❌ 已禁用';
   showToast('流式输出：'+(streamMode?'开启':'关闭'),'success');
 }
-
 function clearInput(){
   document.getElementById('chat-input').value='';
   document.getElementById('char-count').textContent='0';
@@ -1061,9 +992,7 @@ function clearInput(){
   document.getElementById('file-area').innerHTML='';
   document.getElementById('file-area').classList.remove('active');
 }
-
 function scrollToBottom(){document.getElementById('chat-messages').scrollTo({top:999999,behavior:'smooth'})}
-
 function addChatMsg(role,text,time=null,save=true){
   document.querySelector('.empty')?.remove();
   const msgTime=time||getCurrentTime();
@@ -1081,13 +1010,11 @@ function addChatMsg(role,text,time=null,save=true){
   if(save)saveCurrentChat();
   return document.getElementById(msgId);
 }
-
 function copyMsg(id){navigator.clipboard.writeText(document.getElementById(id).innerText);showToast('已复制！','success')}
 function copyText(text){navigator.clipboard.writeText(text);showToast('已复制！','success')}
 function deleteMsg(btn){if(confirm('确定删除这条消息？')){btn.closest('.message').remove();showToast('已删除','success')}}
 function clearChat(){if(confirm('确定清空所有消息？')){document.getElementById('chat-messages').innerHTML='<div class="empty"><div class="empty-icon">💬</div><h3 style="font-size:var(--font-lg)">已清空</h3></div>';chatHistory=[];saveCurrentChat();showToast('已清空','success')}}
 function exportChat(){if(chatHistory.length===0)return showToast('暂无消息','warning');const data=chatHistory.map(m=>'['+m.time+'] '+(m.role==='user'?'用户':'AI')+': '+m.content).join('\\n\\n');const blob=new Blob([data],{type:'text/plain'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='对话记录-'+Date.now()+'.txt';a.click();showToast('已导出！','success')}
-
 async function sendChat(){
   if(isGenerating)return showToast('请稍候...','warning');
   let prompt=document.getElementById('chat-input').value.trim();
@@ -1162,7 +1089,6 @@ async function sendChat(){
     document.getElementById('char-count').textContent='0';
   }
 }
-
 function downloadImg(url,prompt){
   fetch(url).then(r=>r.blob()).then(blob=>{
     const a=document.createElement('a');
@@ -1172,12 +1098,10 @@ function downloadImg(url,prompt){
     showToast('已下载！','success');
   });
 }
-
 function viewImg(url){
   document.getElementById('lightbox-img').src=url;
   document.getElementById('lightbox').classList.add('active');
 }
-
 updateModelInfo();
 <\/script>
 </body>
